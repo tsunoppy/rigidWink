@@ -102,7 +102,7 @@ class Winkler:
     ########################################################################
     # Make Gravity center
     def getG(self,xx1,xx2,yy1,yy2):
-        ag = 0.
+        tmpag = 0.
         tmpxg = 0.
         tmpyg = 0.
 
@@ -111,18 +111,19 @@ class Winkler:
         sumyg = 0.
 
         for i in range(0,len(xx1)):
-            ag = (xx2[i]-xx1[i])*(yy2[i]-yy1[i])
+            tmpag = (xx2[i]-xx1[i])*(yy2[i]-yy1[i])
             tmpxg = (xx2[i]+xx1[i])/2.0
             tmpyg = (yy2[i]+yy1[i])/2.0
-            suma = suma + ag
-            sumxg = sumxg + tmpxg*ag
-            sumyg = sumyg + tmpyg*ag
+            suma = suma + tmpag
+            sumxg = sumxg + tmpxg*tmpag
+            sumyg = sumyg + tmpyg*tmpag
 
         self.xg = float(sumxg)/float(suma)
         self.yg = float(sumyg)/float(suma)
+        self.ag = float(suma)
 
         # Check Result
-        print("g = ", self.xg,self.yg)
+        print("g = ", self.xg,self.yg, "a=",self.ag)
 
     ########################################################################
     # Solve Matrix analysis
@@ -164,10 +165,33 @@ class Winkler:
             if ind == 0:
                 print("Break!-------")
                 break
-        #
+
+        # Cal for output
+        # Total Area
+        # 接地圧, kN/m2
+        sig = spforce // np.array(self.sd)
+        sigmax = 0.0
+        sigmin = 100000.0
+        for i in range(0,len(sig)):
+            if sigmax < sig[i]:
+                sigmax = sig[i]
+                sigmaxId = i
+            if sigmin > sig[i]:
+                sigmin = sig[i]
+                sigminId = i
+        # 接地率
+        sbar = 0.0
+        upliftx = []
+        uplifty = []
+        for i in range(0,len(spforce)):
+            if kdtmp[i] !=  0.0:
+                sbar = sbar + self.sd[i]
+            else:
+                upliftx.append(self.x[i])
+                uplifty.append(self.y[i])
+        eta = sbar/self.ag*100.0
         # output
         #print("A = ",a)
-        sig = spforce // np.array(self.sd)
         print("*** Analysis detail -----------")
         print("K = A*K*AT = \n",kkk)
         print("K^-1= \n",kkkinv)
@@ -176,19 +200,35 @@ class Winkler:
         print("d' = \n", disp2)
         print("f' = \n", spforce)
         print("sig = \n", sig)
+        print("sigMax = \n", sigmax)
+        print("sigMin = \n", sigmin)
+        print("eta = \n", eta)
 
         xx = np.array(self.x)
         yy = np.array(self.y).T
         plt.axes().set_aspect('equal')
+        #plt.scatter(xx[sigmaxId],yy[sigmaxId],color="black")
         plt.scatter(xx,yy,c=sig,cmap='Reds', vmin=0.0)
 #        plt.scatter(xx,yy,c=sig,cmap='Greys', vmin=0.0)
 #        plt.scatter(xx,yy,c=sig,cmap='binary', vmin=0.0)
         plt.colorbar()
         plt.show()
 
+        """
+        plt.cla()
+        plt.figure()
+        if len(upliftx) != 0:
+            plt.axes().set_aspect('equal')
+            plt.scatter(upliftx,uplifty,s=1,color="blue")
+        plt.colorbar()
+        plt.show()
+        """
+
+
 ########################################################################
 # End Class
 
+"""
 obj = Winkler()
 
 # Force
@@ -238,3 +278,4 @@ obj.solve(nn,mmx,mmy)
 print("------------------------------")
 obj.solve(nn,0,0)
 print("Complete")
+"""
