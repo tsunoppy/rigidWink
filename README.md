@@ -1,6 +1,8 @@
- # rigidWink
+# rigidWink
 
 uplift analysis by winkler rigid plate model
+
+![Image](./images/rigidWink.png)
 
 # Souse Code
 
