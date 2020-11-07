@@ -8,6 +8,9 @@ from openpyxl.utils import get_column_letter # 列幅の指定 2020/05/27
 import numpy as np
 import matplotlib.pyplot as plt
 
+# File Control
+import os
+
 class Winkler:
 
     ########################################################################
@@ -21,6 +24,8 @@ class Winkler:
         self.ag = 0. # area
         self.xg = 0. # gravity center
         self.yg = 0. # gravity center
+        self.gmax = 0. # graph area
+        self.gmin = 0. # graph area
         self.error = "" # Error Message
 
     ########################################################################
@@ -42,10 +47,30 @@ class Winkler:
     # View Model
     def viewModel(self):
         # Spring Position View
+
+        xmax = max(self.x)
+        xmin = min(self.x)
+        ymax = max(self.y)
+        ymin = min(self.y)
+        self.gmax = max(xmax,ymax)
+        self.gmin = min(xmin,ymin)
+        """
+        plt.xlim(gmin-2,gmax+2)
+        plt.ylim(gmin-2,gmax+2)
+        """
+
+        fig = plt.figure()
+
+        plt.axes().spines['right'].set_visible(False)
+        plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
-        plt.scatter(self.x,self.y,s=1,color="black")
-        plt.scatter(self.xg,self.yg,color="red")
+        plt.scatter(self.x,self.y,label="Spring Position", s=1,color="black")
+        plt.scatter(self.xg,self.yg, label="Gravity Center", color="red")
+        plt.legend()
         plt.show()
+
+        fig.savefig("./db/model.png", format="png", dpi=300)
+
 
     ########################################################################
     # Make Model Matrix
@@ -126,9 +151,17 @@ class Winkler:
         print("g = ", self.xg,self.yg, "a=",self.ag)
 
     ########################################################################
+    # output text file
+    def out(self,outFile,lines):
+        fout = open(outFile, "w")
+        fout.writelines(lines)
+        fout.close()
+
+    ########################################################################
     # Solve Matrix analysis
     def solve(self,nn,mmx,mmy):
-        print("Start Solve-------")
+        details = "### Analysis detail ----------- \n"
+        details += "# Start Solve------\n"
         force = np.array([mmx,mmy,nn])
         # 釣り合いマトリクス, A
         #print(self.x)
@@ -145,7 +178,7 @@ class Winkler:
         #####
         # 収歛計算
         for ii in range(0,100):
-            print("Cal_",ii+1)
+            details += "Cal_" + str(ii+1) + "\n"
             # 縮合マトリックス
             kk = np.diag(kdtmp)
             kkk = a @ kk @ at
@@ -163,7 +196,7 @@ class Winkler:
                     np.put(kdtmp,[i],0.0)
                     ind = 1
             if ind == 0:
-                print("Break!-------")
+                details += "break\n---"
                 break
 
         # Cal for output
@@ -190,8 +223,10 @@ class Winkler:
                 upliftx.append(self.x[i])
                 uplifty.append(self.y[i])
         eta = sbar/self.ag*100.0
-        # output
-        #print("A = ",a)
+
+        # Checkoutput
+        ####################
+        """
         print("*** Analysis detail -----------")
         print("K = A*K*AT = \n",kkk)
         print("K^-1= \n",kkkinv)
@@ -203,6 +238,64 @@ class Winkler:
         print("sigMax = \n", sigmax)
         print("sigMin = \n", sigmin)
         print("eta = \n", eta)
+        """
+
+        # Details
+        ####################
+
+        details += "K = A*K*AT = \n"
+        details += str(kkk) + "\n"
+        details += "K^-1= \n"
+        details += str(kkkinv) + "\n"
+        details += "f = [Mx, My, Nz] = \n"
+        details += str(force) + "\n"
+        details += "d = [tx, ty, dz] = \n"
+        details += str(disp) + "\n"
+        details += "d' = \n"
+        details += str(disp2) + "\n"
+        details += "f' = \n"
+        details += str(spforce) + "\n"
+        details += "sig = \n"
+        details += str(sig) + "\n"
+        details += "sigMax = "
+        details += str(sigmax) + "\n"
+        details += "sigMin = "
+        details += str(sigmin) + "\n"
+        details += "eta ="
+        details += str(eta) + "\n"
+
+        lines = "\n"
+        lines += "# Load:\n"
+        lines += "   N  = "
+        lines += "{:.0f} kN\n".format(force[2])
+        lines += "   Mx = "
+        lines += "{:.0f} kN.m\n".format(force[0])
+        lines += "   My = "
+        lines += "{:.0f} kN.m\n".format(force[1])
+
+        lines += "\n"
+        lines += "# Disp.:\n"
+        lines += "   dz  = "
+        lines += "{:.0f} mm\n".format(disp[2]*1000)
+        lines += "   tx = "
+        lines += "1/{:.0f} rad\n".format(1.0/disp[0])
+        lines += "   ty = "
+        lines += "1/{:.0f} rad\n".format(1.0/disp[1])
+
+        lines += "\n"
+        lines += "# Max.:\n"
+        lines += "   Vertial Disp. : "
+        lines += " {:.0f} mm\n".format(np.max(disp2)*1000)
+        lines += "   Max. Pressure : "
+        lines += " {:.0f} kN/m2\n".format(sigmax)
+        lines += "   Min. Pressure : "
+        lines += " {:.0f} kN/m2\n".format(sigmin)
+        lines += "   Max. Angle : "
+        maxtheta = 1.0/(math.sqrt(disp[0]**2+disp[1]**2))
+        lines += " {:.0f} rad\n".format(maxtheta)
+        lines += "   Contact Ratio : "
+        lines += " {:.0f} %\n".format(eta)
+
 
         xx = np.array(self.x)
         yy = np.array(self.y).T
@@ -214,15 +307,32 @@ class Winkler:
         plt.colorbar()
         plt.show()
 
-        """
-        plt.cla()
-        plt.figure()
+
+        # Uplift Spring plot
+        fig = plt.figure()
+        plt.axes().spines['right'].set_visible(False)
+        plt.axes().spines['top'].set_visible(False)
+        plt.axes().set_aspect('equal')
+        plt.scatter(self.x,self.y, s=1,color="black")
+        plt.scatter(self.xg,self.yg, color="red")
         if len(upliftx) != 0:
-            plt.axes().set_aspect('equal')
             plt.scatter(upliftx,uplifty,s=1,color="blue")
-        plt.colorbar()
-        plt.show()
-        """
+        fig.savefig("./db/uplift.png", format="png", dpi=300)
+
+        # 画像の保存
+        fig = plt.figure()
+
+        plt.axes().spines['right'].set_visible(False)
+        plt.axes().spines['top'].set_visible(False)
+        plt.axes().set_aspect('equal')
+        plt.scatter(xx,yy,c=sig,cmap='Reds',vmin=0.0)
+#        plt.show()
+        fig.savefig("./db/result.png", format="png", dpi=300)
+
+        # save result text
+        self.out("./db/result.txt",lines)
+        self.out("./db/detail.txt",details)
+
 
 
 ########################################################################
