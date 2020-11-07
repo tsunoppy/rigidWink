@@ -51,12 +51,30 @@ class MyFrame(gui.MyFrame):
         self.Destroy()
 
     def OnExec(self, event):  # wxGlade: MyFrame.<event_handler>
+
+        """
+        # test
+        label1 = wx.StaticText(self.panel_result, wx.ID_ANY, 'hello')
+        label2 = wx.StaticText(self.panel_result, wx.ID_ANY, 'Analysis Result')
+        label3 = wx.StaticText(self.panel_result, wx.ID_ANY, 'Why?')
+
+        layout = wx.BoxSizer(wx.VERTICAL)
+
+        #cases.SetLabel('Permanent')
+        layout.Add(label1, proportion=0)
+        self.panel_result.SetSizer(layout)
+        #layout.Add(label2, proportion=0)
+        #layout.Add(cases)
+
+        #layout.Layout()
+        """
+
         obj = rigidWink.Winkler()
 
         # Force
         nn  = 1400000.0 # Axial Force, kN
         mmx = 0 # Over Turning Moment, kN.m
-        mmx = 15000000.0 # Over Turning Moment, kN.m
+#        mmx = 15000000.0 # Over Turning Moment, kN.m
         mmy = 15000000.0 # Over Turning Moment, kN.m
         #mmy = 8000000.0 # Over Turning Moment, kN.m
 
@@ -106,8 +124,43 @@ class MyFrame(gui.MyFrame):
         self.matplotlib_axes.scatter(obj.x,obj.y,s=1,color="black")
         self.matplotlib_axes.spines['right'].set_visible(False)
         self.matplotlib_axes.spines['top'].set_visible(False)
+        #test
+        self.matplotlib_axes.set_aspect('equal')
         self.matplotlib_canvas.draw()
         event.Skip()
+
+        # 画像をパネルに表示
+        # Model
+        """
+        image = wx.Image('db/model.png')
+        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_disp, -1, bitmap, pos=(0,0) )
+        """
+        # Stress
+        image = wx.Image('db/result.png')
+        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
+        # Uplift
+        image = wx.Image('db/uplift.png')
+        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
+
+        # Summary テキストデータを表示
+        f = open("./db/result.txt",'r')
+        line = f.read()
+        f.close()
+        #self.text_ctrl_result.AppendText(line)
+        self.text_ctrl_result.ChangeValue(line)
+
+        # Detail テキストデータを表示
+        f = open("./db/detail.txt",'r')
+        line = f.read()
+        f.close()
+        self.text_ctrl_detail.ChangeValue(line)
+
 
         """
         obj = stiff2D.Stiff2D()
@@ -222,7 +275,7 @@ class MyFrame(gui.MyFrame):
             self.matplotlib_canvas.draw()
             event.Skip()
         """
-        
+
 # end of class MyFrame
 
 class MyApp(wx.App):
