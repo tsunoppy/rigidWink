@@ -2,6 +2,8 @@
 
 uplift analysis by winkler rigid plate model
 
+souse code is under construction
+
 ![Image](./images/rigidWink.png)
 
 # Souse Code
