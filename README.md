@@ -21,7 +21,10 @@ uplift analysis by winkler rigid plate model
 ```
 # Usage
 
+move your dir, then
+
 ``` shell
+>mkdir db
 >python3 main.py
 ```
 
