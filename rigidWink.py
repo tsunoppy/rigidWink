@@ -38,6 +38,15 @@ class Winkler:
             # m,m,m,m,kN/m2/m,-,-
             for i in range(0,len(xx1)):
                 self.creatMatrix(xx1[i],xx2[i],yy1[i],yy2[i],kb[i],ndimx[i],ndimy[i])
+                """
+            plt.axes().spines['right'].set_visible(False)
+            plt.axes().spines['top'].set_visible(False)
+            plt.axes().set_aspect('equal')
+            plt.scatter(self.x,self.y, s=1,color="black")
+            plt.scatter(self.xg,self.yg, color="red")
+            fig.savefig("./db/model.png", format="png", dpi=300)
+            plt.close(fig)
+                """
             return 1
         except Exception as err:
             print(err)
@@ -58,19 +67,19 @@ class Winkler:
         plt.xlim(gmin-2,gmax+2)
         plt.ylim(gmin-2,gmax+2)
         """
-
         fig = plt.figure()
-
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
+        """
         plt.scatter(self.x,self.y,label="Spring Position", s=1,color="black")
         plt.scatter(self.xg,self.yg, label="Gravity Center", color="red")
         plt.legend()
+        """
+        plt.scatter(self.x,self.y,s=1,color="black")
+        plt.scatter(self.xg,self.yg, color="red")
         plt.show()
-
-        fig.savefig("./db/model.png", format="png", dpi=300)
-
+        plt.close(fig)
 
     ########################################################################
     # Make Model Matrix
@@ -159,7 +168,7 @@ class Winkler:
 
     ########################################################################
     # Solve Matrix analysis
-    def solve(self,nn,mmx,mmy):
+    def solve(self,title,index,nn,mmx,mmy):
         details = "### Analysis detail ----------- \n"
         details += "# Start Solve------\n"
         force = np.array([mmx,mmy,nn])
@@ -265,6 +274,8 @@ class Winkler:
         details += str(eta) + "\n"
 
         lines = "\n"
+        lines += "# Case: " + str(title) + "\n"
+        lines += "\n"
         lines += "# Load:\n"
         lines += "   N  = "
         lines += "{:.0f} kN\n".format(force[2])
@@ -299,14 +310,16 @@ class Winkler:
 
         xx = np.array(self.x)
         yy = np.array(self.y).T
+
+
+        ########################################################################
+        # Interactive Glaph
+        """
         plt.axes().set_aspect('equal')
-        #plt.scatter(xx[sigmaxId],yy[sigmaxId],color="black")
         plt.scatter(xx,yy,c=sig,cmap='Reds', vmin=0.0)
-#        plt.scatter(xx,yy,c=sig,cmap='Greys', vmin=0.0)
-#        plt.scatter(xx,yy,c=sig,cmap='binary', vmin=0.0)
         plt.colorbar()
         plt.show()
-
+        """
 
         # Uplift Spring plot
         fig = plt.figure()
@@ -317,21 +330,26 @@ class Winkler:
         plt.scatter(self.xg,self.yg, color="red")
         if len(upliftx) != 0:
             plt.scatter(upliftx,uplifty,s=1,color="blue")
-        fig.savefig("./db/uplift.png", format="png", dpi=300)
+        savefile = "./db/uplift_"+str(index)+".png"
+        fig.savefig(savefile, format="png", dpi=300)
+        plt.close(fig)
 
-        # 画像の保存
+        # Stress plot
         fig = plt.figure()
 
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
         plt.scatter(xx,yy,c=sig,cmap='Reds',vmin=0.0)
-#        plt.show()
-        fig.savefig("./db/result.png", format="png", dpi=300)
+        savefile = "./db/result_"+str(index)+".png"
+        fig.savefig( savefile, format="png", dpi=300)
+        plt.close(fig)
 
         # save result text
-        self.out("./db/result.txt",lines)
-        self.out("./db/detail.txt",details)
+        savefile = "./db/result_"+str(index)+".txt"
+        self.out(savefile,lines)
+        savefile = "./db/detail_"+str(index)+".txt"
+        self.out(savefile,details)
 
 
 

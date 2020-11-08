@@ -29,6 +29,120 @@ import rigidWink
 class MyFrame(gui.MyFrame):
 
 
+    # Sample Data Loading
+    def OnSample(self,event):
+
+        xx1 = []
+        xx2 = []
+        yy1 = []
+        yy2 = []
+        ndimx = []
+        ndimy = []
+        kb = []
+
+        # make sample model
+        xx1.append(0.0)
+        xx2.append(100.0)
+        yy1.append(0.0)
+        yy2.append(30.0)
+        ndimx.append(100)
+        ndimy.append(30)
+        kb.append(50000.0)
+
+        xx1.append(0.0)
+        xx2.append(50.0)
+        yy1.append(30.0)
+        yy2.append(60.0)
+        ndimx.append(50)
+        ndimy.append(30)
+        kb.append(50000.0)
+
+        for i in range(0,len(xx1)):
+            self.grid_model.SetCellValue(i,0,str(xx1[i]))
+            self.grid_model.SetCellValue(i,1,str(xx2[i]))
+            self.grid_model.SetCellValue(i,2,str(yy1[i]))
+            self.grid_model.SetCellValue(i,3,str(yy2[i]))
+            self.grid_model.SetCellValue(i,4,str(ndimx[i]))
+            self.grid_model.SetCellValue(i,5,str(ndimy[i]))
+            self.grid_model.SetCellValue(i,6,str(kb[i]))
+
+        # make load data
+        case = []
+        nn = [] # Axial Force, kN
+        mmx = [] # Over Turning Moment, kN.m
+        mmy = [] # Over Turning Moment, kN.m
+        case.append("L")
+        nn.append(1400000.0)
+        mmx.append(0.0)
+        mmy.append(5000000.0)
+        case.append("L1X")
+        nn.append(0.0)
+        mmx.append(10000000.0)
+        mmy.append(0.0)
+        case.append("L1Y")
+        nn.append(0.0)
+        mmx.append(0.0)
+        mmy.append(10000000.0)
+        for i in range(0,len(case)):
+            self.grid_load.SetCellValue(i,0,case[i])
+            self.grid_load.SetCellValue(i,1,str(nn[i]))
+            self.grid_load.SetCellValue(i,2,str(mmx[i]))
+            self.grid_load.SetCellValue(i,3,str(mmy[i]))
+
+        # make compb data
+        label = []
+        fac1  = []
+        case1 = []
+        fac2  = []
+        case2 = []
+        fac3  = []
+        case3 = []
+        fac4  = []
+        case4 = []
+        #
+        label.append("L/Permanent")
+        case1.append("L")
+        fac1.append(1.0)
+        case2.append("")
+        fac2.append("")
+        case3.append("")
+        fac3.append("")
+        case4.append("")
+        fac4.append("")
+        #
+        label.append("L1_X+")
+        case1.append("L")
+        fac1.append(1.0)
+        case2.append("L1X")
+        fac2.append(1.0)
+        case3.append("")
+        fac3.append("")
+        case4.append("")
+        fac4.append("")
+        #
+        label.append("L1_45+")
+        case1.append("L")
+        fac1.append(1.0)
+        case2.append("L1X")
+        fac2.append(1.0)
+        case3.append("L1Y")
+        fac3.append(1.0)
+        case4.append("")
+        fac4.append("")
+
+        for i in range(0,len(label)):
+            self.grid_comb.SetCellValue(i,0,label[i])
+            self.grid_comb.SetCellValue(i,1,case1[i])
+            self.grid_comb.SetCellValue(i,2,str(fac1[i]))
+            self.grid_comb.SetCellValue(i,3,case2[i])
+            self.grid_comb.SetCellValue(i,4,str(fac2[i]))
+            self.grid_comb.SetCellValue(i,5,case3[i])
+            self.grid_comb.SetCellValue(i,6,str(fac3[i]))
+            self.grid_comb.SetCellValue(i,7,case4[i])
+            self.grid_comb.SetCellValue(i,8,str(fac4[i]))
+
+    # Import Read xlsx sheet
+    ########################################################################
     def OnChooseTargetFile(self, event):  # wxGlade: MyFrame.<event_handler>
         pathname = self.showFileDialog()
         self.text_ctrl_1.SetValue(pathname)
@@ -50,34 +164,103 @@ class MyFrame(gui.MyFrame):
     def OnCancel(self, event):  # wxGlade: MyFrame.<event_handler>
         self.Destroy()
 
+    def OnAbout(self,event):
+        comment = 'Welcome to rigid wink!!'
+        dlg = wx.MessageDialog(self, 'MIT Licence',
+                               'Coded by Tsunoppy',
+                               wx.OK | wx.ICON_INFORMATION
+                               )
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def OnPre(self,event):
+
+        index = self.text_ctrl_index.GetValue()
+        index = int(index)-1
+        num = self.text_ctrl_total.GetValue()
+        num = int(num)
+        if index < 0:
+            index = int(num)
+            self.text_ctrl_index.SetValue(str(index))
+        else:
+            self.text_ctrl_index.SetValue(str(index))
+
+        # Stress
+        data = "db/result_" + str(index) + ".png"
+        image = wx.Image(data)
+        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
+        # Uplift
+        data = "db/uplift_" + str(index) + ".png"
+        image = wx.Image(data)
+        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
+
+        # Summary テキストデータを表示
+        data = "db/result_" + str(index) + ".txt"
+        f = open(data,'r')
+        line = f.read()
+        f.close()
+        #self.text_ctrl_result.AppendText(line)
+        self.text_ctrl_result.ChangeValue(line)
+
+        # Detail テキストデータを表示
+        data = "db/detail_" + str(index) + ".txt"
+        f = open(data,'r')
+        line = f.read()
+        f.close()
+        self.text_ctrl_detail.ChangeValue(line)
+
+    def OnNext(self,event):
+        index = self.text_ctrl_index.GetValue()
+        index = int(index)+1
+        num = self.text_ctrl_total.GetValue()
+        num = int(num)
+        if index <= num:
+            self.text_ctrl_index.SetValue(str(index))
+        else:
+            index = int(0)
+            self.text_ctrl_index.SetValue(str(0))
+
+        # Stress
+        data = "db/result_" + str(index) + ".png"
+        image = wx.Image(data)
+        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
+        # Uplift
+        data = "db/uplift_" + str(index) + ".png"
+        image = wx.Image(data)
+        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
+
+        # Summary テキストデータを表示
+        data = "db/result_" + str(index) + ".txt"
+        f = open(data,'r')
+        line = f.read()
+        f.close()
+        #self.text_ctrl_result.AppendText(line)
+        self.text_ctrl_result.ChangeValue(line)
+
+        # Detail テキストデータを表示
+        data = "db/detail_" + str(index) + ".txt"
+        f = open(data,'r')
+        line = f.read()
+        f.close()
+        self.text_ctrl_detail.ChangeValue(line)
+
+
+    # Run Solve
+    ########################################################################
     def OnExec(self, event):  # wxGlade: MyFrame.<event_handler>
-
-        """
-        # test
-        label1 = wx.StaticText(self.panel_result, wx.ID_ANY, 'hello')
-        label2 = wx.StaticText(self.panel_result, wx.ID_ANY, 'Analysis Result')
-        label3 = wx.StaticText(self.panel_result, wx.ID_ANY, 'Why?')
-
-        layout = wx.BoxSizer(wx.VERTICAL)
-
-        #cases.SetLabel('Permanent')
-        layout.Add(label1, proportion=0)
-        self.panel_result.SetSizer(layout)
-        #layout.Add(label2, proportion=0)
-        #layout.Add(cases)
-
-        #layout.Layout()
-        """
 
         obj = rigidWink.Winkler()
 
-        # Force
-        nn  = 1400000.0 # Axial Force, kN
-        mmx = 0 # Over Turning Moment, kN.m
-#        mmx = 15000000.0 # Over Turning Moment, kN.m
-        mmy = 15000000.0 # Over Turning Moment, kN.m
-        #mmy = 8000000.0 # Over Turning Moment, kN.m
-
+        # Read Model
+        ####################
         xx1 = []
         xx2 = []
         yy1 = []
@@ -86,40 +269,123 @@ class MyFrame(gui.MyFrame):
         ndimy = []
         kb = []
 
-        xx1.append(0.0)
-        xx2.append(100.0)
-        yy1.append(0.0)
-        yy2.append(30.0)
-        ndimx.append(100)
-        ndimy.append(30)
-        kb.append(50000.0)
+        for i in range(0,100):
+            value = self.grid_model.GetCellValue(i,0)
+            if value != "":
+                xx1.append(float(self.grid_model.GetCellValue(i,0)))
+                xx2.append(float(self.grid_model.GetCellValue(i,1)))
+                yy1.append(float(self.grid_model.GetCellValue(i,2)))
+                yy2.append(float(self.grid_model.GetCellValue(i,3)))
+                ndimx.append(int(self.grid_model.GetCellValue(i,4)))
+                ndimy.append(int(self.grid_model.GetCellValue(i,5)))
+                kb.append(float(self.grid_model.GetCellValue(i,6)))
+            else:
+                #print("model, break")
+                break
 
 
-        xx1.append(0.0)
-        xx2.append(50.0)
-        yy1.append(30.0)
-        yy2.append(60.0)
-        ndimx.append(50)
-        ndimy.append(30)
-        kb.append(50000.0)
+
+        # Read LOAD
+        ####################
+        case = []
+        nn = []
+        mmx = []
+        mmy = []
+        for i in range(0,100):
+            value = self.grid_load.GetCellValue(i,0)
+            if value != "":
+                case.append(self.grid_load.GetCellValue(i,0))
+                nn.append(float(self.grid_load.GetCellValue(i,1)))
+                mmx.append(float(self.grid_load.GetCellValue(i,2)))
+                mmy.append(float(self.grid_load.GetCellValue(i,3)))
+            else:
+                #print("load, break")
+                break
+
+        # Read Comb
+        ####################
+        label = []
+        case1 = []
+        fac1  = []
+        case2 = []
+        fac2  = []
+        case3 = []
+        fac3  = []
+        case4 = []
+        fac4  = []
+        for i in range(0,100):
+            value = self.grid_comb.GetCellValue(i,0)
+            if value != "":
+                label.append(self.grid_comb.GetCellValue(i,0))
+                case1.append(self.grid_comb.GetCellValue(i,1))
+                fac1.append(self.grid_comb.GetCellValue(i,2))
+                case2.append(self.grid_comb.GetCellValue(i,3))
+                fac2.append(self.grid_comb.GetCellValue(i,4))
+                case3.append(self.grid_comb.GetCellValue(i,5))
+                fac3.append(self.grid_comb.GetCellValue(i,6))
+                case4.append(self.grid_comb.GetCellValue(i,7))
+                fac4.append(self.grid_comb.GetCellValue(i,8))
+            else:
+                #print("comb, break")
+                break
+
+        # organized analysis case
+        n = []
+        mx = []
+        my = []
+
+        totalNum = int(len(label))-1
+        self.text_ctrl_total.SetValue(str(totalNum))
+
+        for i in range(0,len(label)):
+            n.append(0.0)
+            mx.append(0.0)
+            my.append(0.0)
+            for j in range(0,len(case)):
+                if case1[i] == case[j] and case1[i] != "":
+                    fac1[i] = float(fac1[i])
+                    n[i]  =  n[i] + nn[j] *fac1[i]
+                    mx[i] = mx[i] + mmx[j]*fac1[i]
+                    my[i] = my[i] + mmy[j]*fac1[i]
+                if case2[i] == case[j] and case2[i] != "":
+                    fac2[i] = float(fac2[i])
+                    n[i]  = n[i]  + nn[j] *fac2[i]
+                    mx[i] = mx[i] + mmx[j]*fac2[i]
+                    my[i] = my[i] + mmy[j]*fac2[i]
+                if case3[i] == case[j] and case3[i] != "":
+                    fac3[i] = float(fac3[i])
+                    n[i]  = n[i]  + nn[j] *fac3[i]
+                    mx[i] = mx[i] + mmx[j]*fac3[i]
+                    my[i] = my[i] + mmy[j]*fac3[i]
+                if case4[i] == case[j] and case4[i] != "":
+                    fac4[i] = float(fac4[i])
+                    n[i]  = n[i]  + nn[j] *fac4[i]
+                    mx[i] = mx[i] + mmx[j]*fac4[i]
+                    my[i] = my[i] + mmy[j]*fac4[i]
 
 
-        print("------------------------------")
+        # analysis
+        ########################################################################
 
         if obj.getModel(xx1,xx2,yy1,yy2,ndimx,ndimy,kb):
             obj.getG(xx1,xx2,yy1,yy2)
-            obj.viewModel()
+            #obj.viewModel()
             print("Complete Model Making")
+            dlg = wx.MessageDialog(self, 'Complete Model Maiking',
+                                   'Complete',
+                                   wx.OK | wx.ICON_INFORMATION
+                                   )
+            dlg.ShowModal()
+            dlg.Destroy()
         else:
             del obj
             obj = rigidWink.Winkler()
             print("Fail Model Making")
 
+        for i in range(0,len(label)):
+            obj.solve(label[i],i,n[i],mx[i],my[i])
 
-        obj.solve(nn,mmx,mmy)
-        print("------------------------------")
-        print("Complete")
-
+        # モデルをcanvasに表示
         #print(obj.x,obj.y)
         self.matplotlib_axes.scatter(obj.x,obj.y,s=1,color="black")
         self.matplotlib_axes.spines['right'].set_visible(False)
@@ -129,40 +395,44 @@ class MyFrame(gui.MyFrame):
         self.matplotlib_canvas.draw()
         event.Skip()
 
+
+        """
         # 画像をパネルに表示
         # Model
-        """
         image = wx.Image('db/model.png')
         image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_disp, -1, bitmap, pos=(0,0) )
         """
+
         # Stress
-        image = wx.Image('db/result.png')
+        image = wx.Image('db/result_0.png')
         image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
         # Uplift
-        image = wx.Image('db/uplift.png')
+        image = wx.Image('db/uplift_0.png')
         image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
 
         # Summary テキストデータを表示
-        f = open("./db/result.txt",'r')
+        f = open("./db/result_0.txt",'r')
         line = f.read()
         f.close()
         #self.text_ctrl_result.AppendText(line)
         self.text_ctrl_result.ChangeValue(line)
 
         # Detail テキストデータを表示
-        f = open("./db/detail.txt",'r')
+        f = open("./db/detail_0.txt",'r')
         line = f.read()
         f.close()
         self.text_ctrl_detail.ChangeValue(line)
 
 
+
         """
+        
         obj = stiff2D.Stiff2D()
         # read data
         if obj.read_data_xlsx(target_file):
@@ -207,8 +477,33 @@ class MyFrame(gui.MyFrame):
 
         """
     def OnPlot(self, event):  # wxGlade: MyFrame.<event_handler>
+
         # Make Model
         obj = rigidWink.Winkler()
+        # Read Model
+        ####################
+        xx1 = []
+        xx2 = []
+        yy1 = []
+        yy2 = []
+        ndimx = []
+        ndimy = []
+        kb = []
+
+        for i in range(0,100):
+            value = self.grid_model.GetCellValue(i,0)
+            if value != "":
+                xx1.append(float(self.grid_model.GetCellValue(i,0)))
+                xx2.append(float(self.grid_model.GetCellValue(i,1)))
+                yy1.append(float(self.grid_model.GetCellValue(i,2)))
+                yy2.append(float(self.grid_model.GetCellValue(i,3)))
+                ndimx.append(int(self.grid_model.GetCellValue(i,4)))
+                ndimy.append(int(self.grid_model.GetCellValue(i,5)))
+                kb.append(float(self.grid_model.GetCellValue(i,6)))
+            else:
+                #print("model, break")
+                break
+
         if obj.getModel(xx1,xx2,yy1,yy2,ndimx,ndimy,kb):
             obj.getG(xx1,xx2,yy1,yy2)
             obj.viewModel()
@@ -218,63 +513,6 @@ class MyFrame(gui.MyFrame):
             obj = rigidWink.Winkler()
             print("Fail Model Making")
 
-        #target_file = self.text_ctrl_1.GetValue()
-        #obj.read_data_xlsx(target_file)
-        #obj.write_model()
-
-        #print(obj.xp,obj.yp)
-        #for i in range(len(obj.memb)):
-            #print(obj.xp[i+1],obj.yp[i+1])
-            #self.matplotlib_axes.plot(obj.xp[i+1],obj.yp[i+1],color="black")
-
-        print(obj.x,obj.y)
-        #self.matplotlib_axes.plot(obj.x,obj.y,s=1,color="black")
-        #self.matplotlib_canvas.draw()
-        #event.Skip()
-        """
-        matplotlib_axes.pyplot.gca().spines['right'].set_visible(False)
-        matplotlib_axes.pyplot.gca().spines['top'].set_visible(False)
-        matplotlib_axes.pyplot.gca().yaxis.set_ticks_position('left')
-        matplotlib_axes.pyplot.gca().xaxis.set_ticks_position('bottom')
-        """
-
-
-
-        """
-        xmin = xmax = step = None
-        try:
-            #xmin = float( self.text_xmin.GetValue() )
-            xmin = float(0)
-            #self.text_xmin.SetBackgroundColour(wx.WHITE)
-        except:
-            #self.text_xmin.SetBackgroundColour(wx.RED)
-            print('okay')
-        try:
-            #xmax = float( self.text_max.GetValue() )
-            xmax = float(10)
-            #self.text_max.SetBackgroundColour(wx.WHITE)
-        except:
-            #self.text_max.SetBackgroundColour(wx.RED)
-            print('okay')
-        try:
-            #step = float( self.text_xstep.GetValue() )
-            step = float(0.1)
-            #self.text_xstep.SetBackgroundColour(wx.WHITE)
-        except:
-            #self.text_xstep.SetBackgroundColour(wx.RED)
-            print('okay')
-
-        x = numpy.arange(xmin, xmax, step)
-        # build globals with some functions
-        g = {}
-        for name in ["sin","cos","tan","ufunc","square"]:
-            g[name] = getattr(numpy, name)
-            #y = eval(self.text_function.GetValue(), g, {"numpy":numpy, "x":x})
-            y = eval('sin(x)', g, {"numpy":numpy, "x":x})
-            self.matplotlib_axes.plot(x,y)
-            self.matplotlib_canvas.draw()
-            event.Skip()
-        """
 
 # end of class MyFrame
 

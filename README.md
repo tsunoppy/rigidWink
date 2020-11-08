@@ -2,8 +2,6 @@
 
 uplift analysis by winkler rigid plate model
 
-souse code is under construction
-
 ![Image](./images/rigidWink.png)
 
 # Souse Code
@@ -26,3 +24,7 @@ souse code is under construction
 ``` shell
 >python3 main.py
 ```
+
+after that,
+- click file -> load sample
+- push "View Model" or "Run" button
