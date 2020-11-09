@@ -20,6 +20,10 @@ import gui
 # read from main solver
 import rigidWink
 
+# excel format
+import openpyxl
+from openpyxl.utils import get_column_letter # 列幅の指定 2020/05/27
+
 # begin wxGlade: dependencies
 # end wxGlade
 
@@ -28,6 +32,102 @@ import rigidWink
 
 class MyFrame(gui.MyFrame):
 
+
+    def write_result_xlsx(self,outputFile):
+        # result.xlsx に計算結果を書き込む
+        # 戻り値 0: 失敗, 1: 成功
+        try:
+            wb = openpyxl.Workbook()
+            # Model
+            ########################################################################
+            ws1 = wb.active
+            ws1.title = 'MODEL'
+            header1 = ['X1, m', 'X2, m', 'Y1, m', 'Y2, m', 'nidmx', 'nidmy', 'kb, kN/m3']
+            for i in range(len(header1)):
+                ws1.cell(row = 1, column = i + 1).value = header1[i]
+            for i in range(0,100):
+                value = self.grid_model.GetCellValue(i,0)
+                if value != '':
+                    for j in range(0,len(header1)):
+                        ws1.cell(row=i+2, column = j+1).value = self.grid_model.GetCellValue(i,j)
+                else:
+                    break
+            # 列幅の指定
+            """
+            ws1.column_dimensions[get_column_letter(1)].width = 10
+            for x in range(1, len(header1)):
+                ws1.column_dimensions[get_column_letter(x + 1)].width = 15
+            """
+            ########################################################################
+            # LOAD
+            ws2 =  wb.create_sheet('LOAD')
+            header2 = ['CASE', 'N, kN', 'Mx, kN.m', 'My, kN.m' ]
+            for i in range(len(header2)):
+                ws2.cell(row = 1, column = i + 1).value = header2[i]
+            for i in range(0,100):
+                value = self.grid_load.GetCellValue(i,0)
+                if value != '':
+                    for j in range(0,len(header2)):
+                        ws2.cell(row=i+2, column = j+1).value = self.grid_load.GetCellValue(i,j)
+                else:
+                    break
+            # 列幅の指定
+            """
+            ws2.column_dimensions[get_column_letter(1)].width = 10
+            for x in range(1, len(header2)):
+                ws2.column_dimensions[get_column_letter(x + 1)].width = 12
+            """
+            ########################################################################
+            # COMB
+            ws3 =  wb.create_sheet('COMB')
+            header3 = ['LABEL', 'LOAD1', '', 'LOAD2', '', 'LOAD3', '', 'LOAD4', '' ]
+            for i in range(len(header3)):
+                ws3.cell(row = 1, column = i + 1).value = header3[i]
+            for i in range(0,100):
+                value = self.grid_comb.GetCellValue(i,0)
+                if value != '':
+                    for j in range(0,len(header3)):
+                        ws3.cell(row=i+2, column = j+1).value = self.grid_comb.GetCellValue(i,j)
+                else:
+                    break
+            ########################################################################
+            wb.save(outputFile)
+            return 1
+        except Exception as err:
+            print(err)
+            return 0
+
+    # Export Excel Sheet
+    def OnLoad(self,event):
+    #def OnSaveAs(self, event):
+        with wx.FileDialog(self, "Save Excel File", wildcard="Input File (*.xlsx)|*.xlsx",
+                           style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+            # save the current contents in the file
+            pathname = fileDialog.GetPath()
+            try:
+                #with open(pathname, 'w') as file:
+                    #self.doSaveData(file)
+                self.write_result_xlsx(pathname)
+            except IOError:
+                wx.LogError("Cannot save current data in file '%s'." % pathname)
+
+    """
+    pathname = self.showFileDialog()
+        #pathname = self.showDialog()
+        print("this is the test",pathname)
+    """
+    def showFileDialog(self):
+        with wx.FileDialog(self, 'Pls, select File',
+                          style=wx.DD_DEFAULT_STYLE
+                                | wx.DD_DIR_MUST_EXIST
+                                | wx.DD_CHANGE_DIR,
+                           defaultFile="rigidWink.xls"
+                          ) as dialog:
+            if dialog.ShowModal() == wx.ID_CANCEL:
+                return
+            return dialog.GetPath()
 
     # Sample Data Loading
     def OnSample(self,event):
@@ -269,6 +369,7 @@ class MyFrame(gui.MyFrame):
         ndimy = []
         kb = []
 
+
         for i in range(0,100):
             value = self.grid_model.GetCellValue(i,0)
             if value != "":
@@ -282,7 +383,6 @@ class MyFrame(gui.MyFrame):
             else:
                 #print("model, break")
                 break
-
 
 
         # Read LOAD
@@ -301,6 +401,28 @@ class MyFrame(gui.MyFrame):
             else:
                 #print("load, break")
                 break
+
+        savefile = "./db/input.txt"
+        lines = "# Model\n"
+        lines += "## Coordinate\n"
+        for i in range(0,len(xx1)):
+            lines += "{:10s}".format(" Area" + str(i+1)) + ", "
+            lines += "{:10.2f}".format(xx1[i])+", "
+            lines += "{:10.2f}".format(xx2[i])+", "
+            lines += "{:10.2f}".format(yy1[i])+", "
+            lines += "{:10.2f}".format(yy2[i])+", "
+            lines += "{:10d}".format(ndimx[i])+", "
+            lines += "{:10d}".format(ndimy[i])+", "
+            lines += "{:10.2f}".format(kb[i])
+            lines += "\n"
+        lines += "#Load\n"
+        for i in range(0,len(case)):
+            lines += "{:10s}".format(case[i]) + ", "
+            lines += "{:15.2f}".format(nn[i]) + ", "
+            lines += "{:15.2f}".format(mmx[i]) + ", "
+            lines += "{:15.2f}".format(mmy[i])
+            lines += "\n"
+        obj.out(savefile,lines)
 
         # Read Comb
         ####################
@@ -429,7 +551,11 @@ class MyFrame(gui.MyFrame):
         f.close()
         self.text_ctrl_detail.ChangeValue(line)
 
-
+        # Input テキストデータを表示
+        f = open("./db/input.txt",'r')
+        line = f.read()
+        f.close()
+        self.text_ctrl_input.ChangeValue(line)
 
         """
         

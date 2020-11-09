@@ -38,7 +38,8 @@ class Winkler:
             # m,m,m,m,kN/m2/m,-,-
             for i in range(0,len(xx1)):
                 self.creatMatrix(xx1[i],xx2[i],yy1[i],yy2[i],kb[i],ndimx[i],ndimy[i])
-                """
+            """
+            # Model save
             plt.axes().spines['right'].set_visible(False)
             plt.axes().spines['top'].set_visible(False)
             plt.axes().set_aspect('equal')
@@ -46,7 +47,8 @@ class Winkler:
             plt.scatter(self.xg,self.yg, color="red")
             fig.savefig("./db/model.png", format="png", dpi=300)
             plt.close(fig)
-                """
+            """
+
             return 1
         except Exception as err:
             print(err)
@@ -159,10 +161,25 @@ class Winkler:
         # Check Result
         print("g = ", self.xg,self.yg, "a=",self.ag)
 
+        # Save Model Input
+        savefile = "./db/input.txt"
+        lines = "## Center of Gravity\n"
+        lines += " "
+        lines += "gx = {:.2f} m".format(self.xg)+", "
+        lines += "gy = {:.2f} m".format(self.yg)+", "
+        lines += "A = {:.2f} m2".format(self.yg)+"\n"
+        self.out_add(savefile,lines)
+
     ########################################################################
-    # output text file
+    # write output text file
     def out(self,outFile,lines):
         fout = open(outFile, "w")
+        fout.writelines(lines)
+        fout.close()
+
+    # add output text file
+    def out_add(self,outFile,lines):
+        fout = open(outFile, "a")
         fout.writelines(lines)
         fout.close()
 
