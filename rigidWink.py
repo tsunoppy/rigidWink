@@ -78,6 +78,7 @@ class Winkler:
         plt.scatter(self.xg,self.yg, label="Gravity Center", color="red")
         plt.legend()
         """
+        plt.tick_params(labelsize="9")
         plt.scatter(self.x,self.y,s=1,color="black")
         plt.scatter(self.xg,self.yg, color="red")
         plt.show()
@@ -343,6 +344,7 @@ class Winkler:
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
+        plt.tick_params(labelsize="9")
         plt.scatter(self.x,self.y, s=1,color="black")
         plt.scatter(self.xg,self.yg, color="red")
         if len(upliftx) != 0:
@@ -357,6 +359,7 @@ class Winkler:
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
+        plt.tick_params(labelsize="9")
         plt.scatter(xx,yy,c=sig,cmap='Reds',vmin=0.0)
         savefile = "./db/result_"+str(index)+".png"
         fig.savefig( savefile, format="png", dpi=300)
