@@ -98,6 +98,7 @@ class MyFrame(gui.MyFrame):
             return 0
 
     # Export Excel Sheet
+    ########################################################################
     def OnLoad(self,event):
     #def OnSaveAs(self, event):
         with wx.FileDialog(self, "Save Excel File", wildcard="Input File (*.xlsx)|*.xlsx",
@@ -118,6 +119,61 @@ class MyFrame(gui.MyFrame):
         #pathname = self.showDialog()
         print("this is the test",pathname)
     """
+    # Import Excel Sheet
+    ########################################################################
+    def OnImport(self, event):
+        """
+        if self.contentNotSaved:
+            if wx.MessageBox("Current content has not been saved! Proceed?", "Please confirm", wx.ICON_QUESTION | wx.YES_NO, self) == wx.NO:
+                return
+        """
+        # otherwise ask the user what new file to open
+        with wx.FileDialog(self, "Open Input xlsx file", wildcard="Input files (*.xlsx)|*.xlsx",
+                           style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as fileDialog:
+
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+
+            # Proceed loading the file chosen by the user
+            pathname = fileDialog.GetPath()
+            try:
+                #with open(pathname, 'r') as file:
+                #self.doLoadDataOrWhatever(file)
+                self.read_data_xlsx(pathname)
+            except IOError:
+                wx.LogError("Cannot open file '%s'." % newfile)
+    """
+    def OnImport(self, event):  # wxGlade: MyFrame.<event_handler>
+        with wx.FileDialog(self, "Import Excel File",
+                           style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+            # save the current contents in the file
+            pathname = fileDialog.GetPath()
+            try:
+                self.read_data_xlsx(pathname)
+            except IOError:
+                wx.LogError("Cannot save current data in file '%s'." % pathname)
+
+        #self.text_ctrl_1.SetValue(pathname)
+    """
+    def read_data_xlsx(self,inputFile):
+        # data.xlsx からデータを読み込む
+        # 戻り値 0: 失敗, 1: 成功
+        model = []
+        load = []
+        comb = []
+        try:
+            wb = openpyxl.load_workbook(inputFile)
+            model(list(wb['MODEL'].values))
+            load(list(wb['LOAD'].values))
+            comb(list(wb['COMB'].values))
+            print(model,load,comb)
+            return 1
+        except Exception as err:
+            print(err)
+            return 0
+
     def showFileDialog(self):
         with wx.FileDialog(self, 'Pls, select File',
                           style=wx.DD_DEFAULT_STYLE
@@ -130,6 +186,7 @@ class MyFrame(gui.MyFrame):
             return dialog.GetPath()
 
     # Sample Data Loading
+    ########################################################################
     def OnSample(self,event):
 
         xx1 = []
