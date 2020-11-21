@@ -4,6 +4,8 @@ uplift analysis by winkler rigid plate model
 
 ![Image](./images/rigidWink.png)
 
+![Image](./images/sample.png)
+
 # Feature
 - Uplift analysis by convergent calculation
 - Rigid plate & Winkler Model
