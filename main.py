@@ -24,6 +24,8 @@ import rigidWink
 import openpyxl
 from openpyxl.utils import get_column_letter # 列幅の指定 2020/05/27
 
+# pdf export
+import report
 # begin wxGlade: dependencies
 # end wxGlade
 
@@ -97,6 +99,36 @@ class MyFrame(gui.MyFrame):
             print(err)
             return 0
 
+
+    # Export Pdf report
+    ########################################################################
+    def Export_pdf(self,event):
+
+        with wx.FileDialog(self, "Save Pdf File", wildcard="Input File (*.pdf)|*.pdf",
+                           style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+            # save the current contents in the file
+            pathname = fileDialog.GetPath() # pdf file
+
+            try:
+                # テキストの読み込み
+                ########################################################################
+                #pdfFile = "test.pdf"
+                num = self.text_ctrl_total.GetValue()
+                num = int(num)+1
+                inputf = []
+                imagefile = []
+                for i in range(0,num):
+                    inputf.append("./db/result_" + str(i) + ".txt")
+                    imagefile.append("./db/result_" + str(i) + ".png")
+                    # イメージファイルの読み込み
+                    obj = report.Report()
+                    obj.create_pdf(inputf,imagefile,pathname)
+
+            except IOError:
+                wx.LogError("Cannot save current data in file '%s'." % pathname)
+
     # Export Excel Sheet
     ########################################################################
     def OnLoad(self,event):
@@ -160,15 +192,54 @@ class MyFrame(gui.MyFrame):
     def read_data_xlsx(self,inputFile):
         # data.xlsx からデータを読み込む
         # 戻り値 0: 失敗, 1: 成功
-        model = []
-        load = []
-        comb = []
+        row = 0
+        column = 0
         try:
             wb = openpyxl.load_workbook(inputFile)
-            model(list(wb['MODEL'].values))
-            load(list(wb['LOAD'].values))
-            comb(list(wb['COMB'].values))
-            print(model,load,comb)
+
+            ####################
+            # Model
+            #ws1 = wb.active
+            #ws1.title = 'MODEL'
+            ws1 = wb['MODEL']
+            for i in range(1,100):
+                if ws1.cell(row=i+1,column=1).value != None:
+                    for j in range(0,7):
+                        if ws1.cell(row=i+1,column=j+1).value != None:
+                            valuecell = str(ws1.cell(row=i+1,column=j+1).value)
+                            self.grid_model.SetCellValue(i-1,j,valuecell)
+                            print(valuecell)
+                else:
+                    break
+            ####################
+            # LOAD
+            #ws2 = wb.active
+            #ws2.title = 'LOAD'
+            ws2 = wb['LOAD']
+            for i in range(1,100):
+                if ws2.cell(row=i+1,column=1).value != None:
+                    for j in range(0,4):
+                        if ws2.cell(row=i+1,column=j+1).value != None:
+                            valuecell = str(ws2.cell(row=i+1,column=j+1).value)
+                            self.grid_load.SetCellValue(i-1,j,valuecell)
+                            print(valuecell)
+                else:
+                    break
+            ####################
+            # COMB
+            #ws3 = wb.active
+            #ws3.title = 'COMB'
+            ws3 = wb['COMB']
+            for i in range(1,100):
+                if ws3.cell(row=i+1,column=1).value != None:
+                    for j in range(0,9):
+                        if ws3.cell(row=i+1,column=j+1).value != None:
+                            valuecell = str(ws3.cell(row=i+1,column=j+1).value)
+                            self.grid_comb.SetCellValue(i-1,j,valuecell)
+                            print(valuecell)
+                else:
+                    break
+
             return 1
         except Exception as err:
             print(err)
@@ -345,13 +416,13 @@ class MyFrame(gui.MyFrame):
         # Stress
         data = "db/result_" + str(index) + ".png"
         image = wx.Image(data)
-        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
         # Uplift
         data = "db/uplift_" + str(index) + ".png"
         image = wx.Image(data)
-        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
 
@@ -384,13 +455,13 @@ class MyFrame(gui.MyFrame):
         # Stress
         data = "db/result_" + str(index) + ".png"
         image = wx.Image(data)
-        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
         # Uplift
         data = "db/uplift_" + str(index) + ".png"
         image = wx.Image(data)
-        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
 
@@ -564,6 +635,7 @@ class MyFrame(gui.MyFrame):
         for i in range(0,len(label)):
             obj.solve(label[i],i,n[i],mx[i],my[i])
 
+        """
         # モデルをcanvasに表示
         #print(obj.x,obj.y)
         self.matplotlib_axes.scatter(obj.x,obj.y,s=1,color="black")
@@ -573,8 +645,7 @@ class MyFrame(gui.MyFrame):
         self.matplotlib_axes.set_aspect('equal')
         self.matplotlib_canvas.draw()
         event.Skip()
-
-
+        """
         """
         # 画像をパネルに表示
         # Model
@@ -583,15 +654,20 @@ class MyFrame(gui.MyFrame):
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_disp, -1, bitmap, pos=(0,0) )
         """
+        # Model
+        image = wx.Image('db/model.png')
+        image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
+        bitmap = image.ConvertToBitmap()
+        wx.StaticBitmap(self.panel_model, -1, bitmap, pos=(0,0) )
 
         # Stress
         image = wx.Image('db/result_0.png')
-        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
         # Uplift
         image = wx.Image('db/uplift_0.png')
-        image = image.Scale(680,480,wx.IMAGE_QUALITY_HIGH)
+        image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
 

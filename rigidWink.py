@@ -38,16 +38,7 @@ class Winkler:
             # m,m,m,m,kN/m2/m,-,-
             for i in range(0,len(xx1)):
                 self.creatMatrix(xx1[i],xx2[i],yy1[i],yy2[i],kb[i],ndimx[i],ndimy[i])
-            """
-            # Model save
-            plt.axes().spines['right'].set_visible(False)
-            plt.axes().spines['top'].set_visible(False)
-            plt.axes().set_aspect('equal')
-            plt.scatter(self.x,self.y, s=1,color="black")
-            plt.scatter(self.xg,self.yg, color="red")
-            fig.savefig("./db/model.png", format="png", dpi=300)
-            plt.close(fig)
-            """
+
 
             return 1
         except Exception as err:
@@ -69,7 +60,7 @@ class Winkler:
         plt.xlim(gmin-2,gmax+2)
         plt.ylim(gmin-2,gmax+2)
         """
-        fig = plt.figure()
+        fig = plt.figure(figsize=(4,4))
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
@@ -296,11 +287,11 @@ class Winkler:
         lines += "\n"
         lines += "# Load:\n"
         lines += "   N  = "
-        lines += "{:.0f} kN\n".format(force[2])
+        lines += " {:.0f} kN\n".format(force[2])
         lines += "   Mx = "
-        lines += "{:.0f} kN.m\n".format(force[0])
+        lines += " {:.0f} kN.m\n".format(force[0])
         lines += "   My = "
-        lines += "{:.0f} kN.m\n".format(force[1])
+        lines += " {:.0f} kN.m\n".format(force[1])
 
         lines += "\n"
         lines += "# Disp.:\n"
@@ -339,8 +330,21 @@ class Winkler:
         plt.show()
         """
 
+        # Model Plot
+        fig = plt.figure(figsize=(4,4))
+        plt.axes().spines['right'].set_visible(False)
+        plt.axes().spines['top'].set_visible(False)
+        plt.axes().set_aspect('equal')
+        plt.tick_params(labelsize="9")
+        plt.scatter(self.x,self.y, s=1,color="black")
+        plt.scatter(self.xg,self.yg, color="red")
+        savefile = "./db/model.png"
+        fig.savefig(savefile, format="png", dpi=300)
+        plt.close(fig)
+
+
         # Uplift Spring plot
-        fig = plt.figure()
+        fig = plt.figure(figsize=(4,4))
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
@@ -354,7 +358,7 @@ class Winkler:
         plt.close(fig)
 
         # Stress plot
-        fig = plt.figure()
+        fig = plt.figure(figsize=(4,4))
 
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
