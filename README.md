@@ -4,6 +4,12 @@ uplift analysis by winkler rigid plate model
 
 ![Image](./images/rigidWink.png)
 
+# Feature
+- Uplift analysis by convergent calculation
+- Rigid plate & Winkler Model
+- Capable of using excel format file
+- Making pdf report
+
 # Souse Code
 
 ``` shell
