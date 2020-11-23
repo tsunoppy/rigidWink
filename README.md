@@ -31,6 +31,15 @@ uplift analysis by winkler rigid plate model
 ```
 # Usage
 
+## pip
+``` shell
+>pip install numpy
+>pip install matplotlib
+>pip install reportlab
+>pip install openpyxl
+>pip install wxpython
+```
+## how to run
 move your dir, then
 
 ``` shell
