@@ -314,7 +314,7 @@ class Winkler:
         lines += " {:.0f} kN/m2\n".format(sigmin)
         lines += "   Max. Angle : "
         maxtheta = 1.0/(math.sqrt(disp[0]**2+disp[1]**2))
-        lines += " {:.0f} rad\n".format(maxtheta)
+        lines += " 1/{:.0f} rad\n".format(maxtheta)
         lines += "   Contact Ratio : "
         lines += " {:.0f} %\n".format(eta)
 
