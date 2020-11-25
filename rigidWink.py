@@ -7,6 +7,7 @@ from openpyxl.utils import get_column_letter # 列幅の指定 2020/05/27
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 # File Control
 import os
@@ -47,7 +48,7 @@ class Winkler:
 
     ########################################################################
     # View Model
-    def viewModel(self):
+    def viewModel(self,r_model):
         # Spring Position View
 
         xmax = max(self.x)
@@ -70,8 +71,9 @@ class Winkler:
         plt.legend()
         """
         plt.tick_params(labelsize="9")
-        plt.scatter(self.x,self.y,s=1,color="black")
-        plt.scatter(self.xg,self.yg, color="red")
+        plt.scatter(self.x,self.y,s=r_model,color="black")
+        sg = r_model*3.0
+        plt.scatter(self.xg,self.yg, s=sg, color="red")
         plt.show()
         plt.close(fig)
 
@@ -177,7 +179,7 @@ class Winkler:
 
     ########################################################################
     # Solve Matrix analysis
-    def solve(self,title,index,nn,mmx,mmy):
+    def solve(self,title,index,nn,mmx,mmy,r_model,r_uplift):
         details = "### Analysis detail ----------- \n"
         details += "# Start Solve------\n"
         force = np.array([mmx,mmy,nn])
@@ -336,13 +338,15 @@ class Winkler:
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
         plt.tick_params(labelsize="9")
-        plt.scatter(self.x,self.y, s=1,color="black")
-        plt.scatter(self.xg,self.yg, color="red")
+        sg = r_model*3.0
+        plt.scatter(self.x,self.y, s=r_model,color="black")
+        plt.scatter(self.xg,self.yg, s=sg, color="red")
         savefile = "./db/model.png"
         fig.savefig(savefile, format="png", dpi=300)
         plt.close(fig)
 
 
+        """
         # Uplift Spring plot
         fig = plt.figure(figsize=(4,4))
         plt.axes().spines['right'].set_visible(False)
@@ -356,15 +360,20 @@ class Winkler:
         savefile = "./db/uplift_"+str(index)+".png"
         fig.savefig(savefile, format="png", dpi=300)
         plt.close(fig)
+        """
 
         # Stress plot
         fig = plt.figure(figsize=(4,4))
-
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
         plt.axes().set_aspect('equal')
         plt.tick_params(labelsize="9")
         plt.scatter(xx,yy,c=sig,cmap='Reds',vmin=0.0)
+        # uplift location
+        if len(upliftx) != 0:
+            for i in range(0,len(upliftx)):
+                c = patches.Circle(xy=(upliftx[i],uplifty[i]), radius=r_uplift, fc='b' )
+                plt.axes().add_patch(c)
         savefile = "./db/result_"+str(index)+".png"
         fig.savefig( savefile, format="png", dpi=300)
         plt.close(fig)

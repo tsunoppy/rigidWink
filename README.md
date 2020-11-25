@@ -4,11 +4,11 @@ uplift analysis by winkler rigid plate model
 
 ![Image](./images/rigidWink.png)
 
-# Feature
+# Features
 - Uplift analysis by convergent calculation
 - Rigid plate & Winkler Model
 - Capable of using excel format file
-- Making pdf report
+- Make pdf report
 
 ![Image](./images/sample.png)
 
@@ -22,7 +22,6 @@ uplift analysis by winkler rigid plate model
 │   ├── model.png
 │   ├── result.png
 │   ├── result.txt
-│   └── uplift.png
 ├── gui.py
 ├── gui.wxg
 ├── main.py

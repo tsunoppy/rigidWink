@@ -7,6 +7,7 @@
 import numpy, matplotlib
 if matplotlib.__version__ < '2.2':
     raise ValueError("Minimum Matplotlib version required: 2.2")
+
 #
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -93,6 +94,20 @@ class MyFrame(gui.MyFrame):
                 else:
                     break
             ########################################################################
+            # ctln
+            ########################################################################
+            ws4 =  wb.create_sheet('CTLN')
+            header4 = ['r, Model', 'r, Uplift']
+            for i in range(len(header4)):
+                ws4.cell(row = 1, column = i + 1).value = header4[i]
+            for i in range(0,100):
+                value = self.grid_ctln.GetCellValue(i,0)
+                if value != '':
+                    for j in range(0,len(header4)):
+                        ws4.cell(row=i+2, column = j+1).value = self.grid_ctln.GetCellValue(i,j)
+                else:
+                    break
+
             wb.save(outputFile)
             return 1
         except Exception as err:
@@ -240,6 +255,19 @@ class MyFrame(gui.MyFrame):
                 else:
                     break
 
+            ####################
+            #  CTLN
+            ws4 = wb['CTLN']
+            for i in range(1,100):
+                if ws4.cell(row=i+1,column=1).value != None:
+                    for j in range(0,9):
+                        if ws4.cell(row=i+1,column=j+1).value != None:
+                            valuecell = str(ws4.cell(row=i+1,column=j+1).value)
+                            self.grid_ctln.SetCellValue(i-1,j,valuecell)
+                            print(valuecell)
+                else:
+                    break
+
             return 1
         except Exception as err:
             print(err)
@@ -369,6 +397,15 @@ class MyFrame(gui.MyFrame):
             self.grid_comb.SetCellValue(i,7,case4[i])
             self.grid_comb.SetCellValue(i,8,str(fac4[i]))
 
+        # make ctln data
+        r_model = [] # Plot radius on model diagram
+        r_uplift = [] # Plot radius on uplift mark
+        r_model.append("1.0")
+        r_uplift.append("0.5")
+        for i in range(0,len(r_model)):
+            self.grid_ctln.SetCellValue(i,0,r_model[i])
+            self.grid_ctln.SetCellValue(i,1,r_uplift[i])
+
     # Import Read xlsx sheet
     ########################################################################
     def OnChooseTargetFile(self, event):  # wxGlade: MyFrame.<event_handler>
@@ -419,12 +456,15 @@ class MyFrame(gui.MyFrame):
         image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
+
+        """
         # Uplift
         data = "db/uplift_" + str(index) + ".png"
         image = wx.Image(data)
         image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
+        """
 
         # Summary テキストデータを表示
         data = "db/result_" + str(index) + ".txt"
@@ -458,12 +498,14 @@ class MyFrame(gui.MyFrame):
         image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
+        """
         # Uplift
         data = "db/uplift_" + str(index) + ".png"
         image = wx.Image(data)
         image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
+        """
 
         # Summary テキストデータを表示
         data = "db/result_" + str(index) + ".txt"
@@ -545,7 +587,7 @@ class MyFrame(gui.MyFrame):
             lines += "\n"
         lines += "#Load\n"
         for i in range(0,len(case)):
-            lines += "{:10s}".format(case[i]) + ", "
+            lines += " {:10s}".format(case[i]) + ", "
             lines += "{:15.2f}".format(nn[i]) + ", "
             lines += "{:15.2f}".format(mmx[i]) + ", "
             lines += "{:15.2f}".format(mmy[i])
@@ -578,6 +620,11 @@ class MyFrame(gui.MyFrame):
             else:
                 #print("comb, break")
                 break
+
+        # Read CTLN
+        ####################
+        r_model = float(self.grid_ctln.GetCellValue(0,0))
+        r_uplift = float(self.grid_ctln.GetCellValue(0,1))
 
         # organized analysis case
         n = []
@@ -633,7 +680,7 @@ class MyFrame(gui.MyFrame):
             print("Fail Model Making")
 
         for i in range(0,len(label)):
-            obj.solve(label[i],i,n[i],mx[i],my[i])
+            obj.solve(label[i],i,n[i],mx[i],my[i],r_model,r_uplift)
 
         """
         # モデルをcanvasに表示
@@ -665,11 +712,13 @@ class MyFrame(gui.MyFrame):
         image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_stress, -1, bitmap, pos=(0,0) )
+        """
         # Uplift
         image = wx.Image('db/uplift_0.png')
         image = image.Scale(480,480,wx.IMAGE_QUALITY_HIGH)
         bitmap = image.ConvertToBitmap()
         wx.StaticBitmap(self.panel_uplift, -1, bitmap, pos=(0,0) )
+        """
 
         # Summary テキストデータを表示
         f = open("./db/result_0.txt",'r')
@@ -762,10 +811,14 @@ class MyFrame(gui.MyFrame):
             else:
                 #print("model, break")
                 break
+        # Read CTLN
+        ####################
+        r_model = float(self.grid_ctln.GetCellValue(0,0))
+        r_uplift = float(self.grid_ctln.GetCellValue(0,1))
 
         if obj.getModel(xx1,xx2,yy1,yy2,ndimx,ndimy,kb):
             obj.getG(xx1,xx2,yy1,yy2)
-            obj.viewModel()
+            obj.viewModel(r_model)
             print("Complete Model Making")
         else:
             del obj
