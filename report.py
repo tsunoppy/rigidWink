@@ -28,7 +28,7 @@ class Report():
             # txt
             c.drawString(55, 720-(i-1)*10 + y_shift, data[i])
             # png
-            c.drawImage(imagefile, 300,  y_shift+50, width=8*cm , preserveAspectRatio=True)
+            c.drawImage(imagefile, 300,  y_shift + 40, width=8*cm , preserveAspectRatio=True)
 
     ########################################################################
     # pdfの作成
@@ -75,8 +75,48 @@ class Report():
         c.showPage()
 
     ########################################################################
+    # pdfの作成
+    def print_head(self, c , title):
+
+        #title = 'Sample Project'
+
+        #タイトル描画
+        c.setFont(self.FONT_NAME, 20)
+        c.drawString(50, 795, title)
+
+        #sub title
+        c.setFont(self.FONT_NAME, 12)
+
+        #データを描画
+        ########################################################################
+        inputf = './db/input.txt'
+        f = open(inputf,'r')
+        tmpData = []
+        while True:
+            line = f.readline()
+            if line:
+                if line != '\n':
+                    tmpData.append(line.replace('\n',''))
+                else:
+                    tmpData.append('')
+            else:
+                break
+        f.close()
+        data = tmpData
+        #c.setFont(self.FONT_NAME, 9)
+        for i in range(0,len(data)):
+            # txt
+            c.drawString(55, 720-(i-1)*14, data[i])
+        """
+        # Model Diagram
+        imagefile = './db/model.png'
+        c.drawImage(imagefile, 60,  -300, width=18*cm , preserveAspectRatio=True)
+        """
+        #ページを確定
+        c.showPage()
+    ########################################################################
     # whole control
-    def create_pdf(self, inputf, imagefile, pdfFile):
+    def create_pdf(self, inputf, imagefile, pdfFile, title):
 
         # Parameter -------
         # inputf   : path to text file
@@ -100,6 +140,8 @@ class Report():
 
         # pdfの作成
         ########################################################################
+        self.print_head( c , title)
+
         for i in range(0,numPage):
             index = 3*i # index: 参照データのインデックス
             if numPage == 1:

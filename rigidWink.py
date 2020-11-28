@@ -64,7 +64,7 @@ class Winkler:
         fig = plt.figure(figsize=(4,4))
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
-        plt.axes().set_aspect('equal')
+        #plt.axes().set_aspect('equal')
         """
         plt.scatter(self.x,self.y,label="Spring Position", s=1,color="black")
         plt.scatter(self.xg,self.yg, label="Gravity Center", color="red")
@@ -74,6 +74,7 @@ class Winkler:
         plt.scatter(self.x,self.y,s=r_model,color="black")
         sg = r_model*3.0
         plt.scatter(self.xg,self.yg, s=sg, color="red")
+        plt.axis('square')
         plt.show()
         plt.close(fig)
 
@@ -162,6 +163,7 @@ class Winkler:
         lines += "gx = {:.2f} m".format(self.xg)+", "
         lines += "gy = {:.2f} m".format(self.yg)+", "
         lines += "A = {:.2f} m2".format(self.yg)+"\n"
+        lines += "\n"
         self.out_add(savefile,lines)
 
     ########################################################################
@@ -336,11 +338,12 @@ class Winkler:
         fig = plt.figure(figsize=(4,4))
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
-        plt.axes().set_aspect('equal')
+#        plt.axes().set_aspect('equal')
         plt.tick_params(labelsize="9")
         sg = r_model*3.0
         plt.scatter(self.x,self.y, s=r_model,color="black")
         plt.scatter(self.xg,self.yg, s=sg, color="red")
+        plt.axis('square')
         savefile = "./db/model.png"
         fig.savefig(savefile, format="png", dpi=300)
         plt.close(fig)
@@ -366,7 +369,7 @@ class Winkler:
         fig = plt.figure(figsize=(4,4))
         plt.axes().spines['right'].set_visible(False)
         plt.axes().spines['top'].set_visible(False)
-        plt.axes().set_aspect('equal')
+        #plt.axes().set_aspect('equal')
         plt.tick_params(labelsize="9")
         plt.scatter(xx,yy,c=sig,cmap='Reds',vmin=0.0)
         # uplift location
@@ -374,6 +377,7 @@ class Winkler:
             for i in range(0,len(upliftx)):
                 c = patches.Circle(xy=(upliftx[i],uplifty[i]), radius=r_uplift, fc='b' )
                 plt.axes().add_patch(c)
+        plt.axis('square')
         savefile = "./db/result_"+str(index)+".png"
         fig.savefig( savefile, format="png", dpi=300)
         plt.close(fig)

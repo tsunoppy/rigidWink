@@ -97,7 +97,7 @@ class MyFrame(gui.MyFrame):
             # ctln
             ########################################################################
             ws4 =  wb.create_sheet('CTLN')
-            header4 = ['r, Model', 'r, Uplift']
+            header4 = ['Title', 'r, Model', 'r, Uplift']
             for i in range(len(header4)):
                 ws4.cell(row = 1, column = i + 1).value = header4[i]
             for i in range(0,100):
@@ -130,6 +130,7 @@ class MyFrame(gui.MyFrame):
                 # テキストの読み込み
                 ########################################################################
                 #pdfFile = "test.pdf"
+                title = self.grid_ctln.GetCellValue(0,0)
                 num = self.text_ctrl_total.GetValue()
                 num = int(num)+1
                 inputf = []
@@ -139,7 +140,7 @@ class MyFrame(gui.MyFrame):
                     imagefile.append("./db/result_" + str(i) + ".png")
                     # イメージファイルの読み込み
                     obj = report.Report()
-                    obj.create_pdf(inputf,imagefile,pathname)
+                    obj.create_pdf(inputf,imagefile,pathname,title)
 
             except IOError:
                 wx.LogError("Cannot save current data in file '%s'." % pathname)
@@ -398,13 +399,15 @@ class MyFrame(gui.MyFrame):
             self.grid_comb.SetCellValue(i,8,str(fac4[i]))
 
         # make ctln data
+        title = 'Sample project'
         r_model = [] # Plot radius on model diagram
         r_uplift = [] # Plot radius on uplift mark
-        r_model.append("1.0")
+        r_model.append("1")
         r_uplift.append("0.5")
         for i in range(0,len(r_model)):
-            self.grid_ctln.SetCellValue(i,0,r_model[i])
-            self.grid_ctln.SetCellValue(i,1,r_uplift[i])
+            self.grid_ctln.SetCellValue(i,0,title)
+            self.grid_ctln.SetCellValue(i,1,r_model[i])
+            self.grid_ctln.SetCellValue(i,2,r_uplift[i])
 
     # Import Read xlsx sheet
     ########################################################################
@@ -522,6 +525,28 @@ class MyFrame(gui.MyFrame):
         f.close()
         self.text_ctrl_detail.ChangeValue(line)
 
+    # about rigidWink
+    ########################################################################
+    def OnAbout(self,event):
+        message = 'Welcom to rigidWink!!\n'
+        message += 'Coded by tsunoppy, 2020, @Tokyo\n'
+        message += 'pls, check the link as bellow ^v^!\n'
+        message += 'https://tsunoppy/.github.io/simpGet'
+        dlg = wx.MessageDialog(self, message,
+                               'About RigidWink',
+                               wx.OK | wx.ICON_INFORMATION
+                               )
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def OnRef(self,event):
+        message = 'https://tsunoppy/.github.io/simpGet'
+        dlg = wx.MessageDialog(self, message,
+                               'Reference',
+                               wx.OK | wx.ICON_INFORMATION
+                               )
+        dlg.ShowModal()
+        dlg.Destroy()
 
     # Run Solve
     ########################################################################
@@ -572,27 +597,6 @@ class MyFrame(gui.MyFrame):
                 #print("load, break")
                 break
 
-        savefile = "./db/input.txt"
-        lines = "# Model\n"
-        lines += "## Coordinate\n"
-        for i in range(0,len(xx1)):
-            lines += "{:10s}".format(" Area" + str(i+1)) + ", "
-            lines += "{:10.2f}".format(xx1[i])+", "
-            lines += "{:10.2f}".format(xx2[i])+", "
-            lines += "{:10.2f}".format(yy1[i])+", "
-            lines += "{:10.2f}".format(yy2[i])+", "
-            lines += "{:10d}".format(ndimx[i])+", "
-            lines += "{:10d}".format(ndimy[i])+", "
-            lines += "{:10.2f}".format(kb[i])
-            lines += "\n"
-        lines += "#Load\n"
-        for i in range(0,len(case)):
-            lines += " {:10s}".format(case[i]) + ", "
-            lines += "{:15.2f}".format(nn[i]) + ", "
-            lines += "{:15.2f}".format(mmx[i]) + ", "
-            lines += "{:15.2f}".format(mmy[i])
-            lines += "\n"
-        obj.out(savefile,lines)
 
         # Read Comb
         ####################
@@ -623,8 +627,9 @@ class MyFrame(gui.MyFrame):
 
         # Read CTLN
         ####################
-        r_model = float(self.grid_ctln.GetCellValue(0,0))
-        r_uplift = float(self.grid_ctln.GetCellValue(0,1))
+        title = self.grid_ctln.GetCellValue(0,0)
+        r_model = float(self.grid_ctln.GetCellValue(0,1))
+        r_uplift = float(self.grid_ctln.GetCellValue(0,2))
 
         # organized analysis case
         n = []
@@ -660,6 +665,39 @@ class MyFrame(gui.MyFrame):
                     mx[i] = mx[i] + mmx[j]*fac4[i]
                     my[i] = my[i] + mmy[j]*fac4[i]
 
+        # make outputfile
+        savefile = "./db/input.txt"
+        lines = "# Model\n"
+        lines += "\n"
+        lines += "## Coordinate\n"
+        for i in range(0,len(xx1)):
+            lines += "{:10s}".format(" Area" + str(i+1)) + ", "
+            lines += "{:10.2f}".format(xx1[i])+", "
+            lines += "{:10.2f}".format(xx2[i])+", "
+            lines += "{:10.2f}".format(yy1[i])+", "
+            lines += "{:10.2f}".format(yy2[i])+", "
+            lines += "{:10d}".format(ndimx[i])+", "
+            lines += "{:10d}".format(ndimy[i])+", "
+            lines += "{:10.2f}".format(kb[i])
+            lines += "\n"
+        lines += "\n"
+        lines += "#Load\n"
+        for i in range(0,len(case)):
+            lines += " {:10s}".format(case[i]) + ", "
+            lines += "{:15.2f}".format(nn[i]) + ", "
+            lines += "{:15.2f}".format(mmx[i]) + ", "
+            lines += "{:15.2f}".format(mmy[i])
+            lines += "\n"
+        lines += "\n"
+        lines += "#Load Combination\n"
+        lines += "\n"
+        for i in range(0,len(label)):
+            lines += '##' + label[i] + ':\n'
+            lines += " N  = {:15.2f}".format(n[i]) + "kN\n"
+            lines += " Mx = {:15.2f}".format(mx[i]) + "kN.m\n"
+            lines += " My = {:15.2f}".format(my[i]) + "kN.m\n"
+            lines += "\n"
+        obj.out(savefile,lines)
 
         # analysis
         ########################################################################
@@ -813,8 +851,9 @@ class MyFrame(gui.MyFrame):
                 break
         # Read CTLN
         ####################
-        r_model = float(self.grid_ctln.GetCellValue(0,0))
-        r_uplift = float(self.grid_ctln.GetCellValue(0,1))
+        titile = self.grid_ctln.GetCellValue(0,0)
+        r_model = float(self.grid_ctln.GetCellValue(0,1))
+        r_uplift = float(self.grid_ctln.GetCellValue(0,2))
 
         if obj.getModel(xx1,xx2,yy1,yy2,ndimx,ndimy,kb):
             obj.getG(xx1,xx2,yy1,yy2)
