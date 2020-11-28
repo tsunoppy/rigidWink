@@ -49,3 +49,12 @@ move your dir, then
 after that,
 - click file -> load sample
 - push "View Model" or "Run" button
+
+## For Windows
+
+``` DOS
+> pyinstaller main.py --onefile --noconsole --icon=images/plate.ico
+> ./dist/main/main.exe
+```
+
+Check Release, and click main/rigidWink.exe!
