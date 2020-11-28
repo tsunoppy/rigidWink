@@ -386,6 +386,26 @@ class MyFrame(gui.MyFrame):
         fac3.append(1.0)
         case4.append("")
         fac4.append("")
+        #
+        label.append("L2_X+")
+        case1.append("L")
+        fac1.append(1.0)
+        case2.append("L1X")
+        fac2.append(2.0)
+        case3.append("")
+        fac3.append("")
+        case4.append("")
+        fac4.append("")
+        #
+        label.append("L2_45+")
+        case1.append("L")
+        fac1.append(1.0)
+        case2.append("L1X")
+        fac2.append(2.0)
+        case3.append("L1Y")
+        fac3.append(2.0)
+        case4.append("")
+        fac4.append("")
 
         for i in range(0,len(label)):
             self.grid_comb.SetCellValue(i,0,label[i])
@@ -668,10 +688,18 @@ class MyFrame(gui.MyFrame):
         # make outputfile
         savefile = "./db/input.txt"
         lines = "# Model\n"
-        lines += "\n"
         lines += "## Coordinate\n"
+        lines += "{:>10s}".format(" No., ")
+        lines += "{:>12}".format('X1 m,')
+        lines += "{:>12}".format('X2 m,')
+        lines += "{:>12}".format('Y1 m,')
+        lines += "{:>12}".format('Y2 m,')
+        lines += "{:>10}".format('-,')
+        lines += "{:>10}".format('-,')
+        lines += "{:>12}".format('kb kN/m3')
+        lines += "\n"
         for i in range(0,len(xx1)):
-            lines += "{:10s}".format(" Area" + str(i+1)) + ", "
+            lines += "{:10s}".format(" Area" + str(i+1) + ", " )
             lines += "{:10.2f}".format(xx1[i])+", "
             lines += "{:10.2f}".format(xx2[i])+", "
             lines += "{:10.2f}".format(yy1[i])+", "
@@ -683,20 +711,34 @@ class MyFrame(gui.MyFrame):
         lines += "\n"
         lines += "#Load\n"
         for i in range(0,len(case)):
-            lines += " {:10s}".format(case[i]) + ", "
-            lines += "{:15.2f}".format(nn[i]) + ", "
-            lines += "{:15.2f}".format(mmx[i]) + ", "
-            lines += "{:15.2f}".format(mmy[i])
-            lines += "\n"
+            lines += '##' + case[i] + ':\n'
+            lines += " {:>3}{:>10.2e}".format('N =',nn[i]) + "kN, "
+            lines += " {:>3}{:>10.2e}".format('Mx=',mmx[i]) + "kN.m, "
+            lines += " {:>3}{:>10.2e}".format('My=',mmy[i]) + "kN.m\n"
         lines += "\n"
         lines += "#Load Combination\n"
-        lines += "\n"
         for i in range(0,len(label)):
-            lines += '##' + label[i] + ':\n'
-            lines += " N  = {:15.2f}".format(n[i]) + "kN\n"
-            lines += " Mx = {:15.2f}".format(mx[i]) + "kN.m\n"
-            lines += " My = {:15.2f}".format(my[i]) + "kN.m\n"
+            lines += '##' + label[i] + '\n'
+
+            if case1[i] != "":
+                lines += " {:>2.2f}".format(fac1[i])
+                lines += ' x ' + case1[i]
+            if case2[i] != "":
+                lines += " + {:>2.2f}".format(fac2[i])
+                lines += ' x ' + case2[i]
+            if case3[i] != "":
+                lines += " + {:>2.2f}".format(fac3[i])
+                lines += ' x ' + case3[i]
+            if case4[i] != "":
+                lines += " + {:>2.2f}".format(fac4[i])
+                lines += ' x ' + case4[i]
+
+
             lines += "\n"
+            lines += " {:>3}{:>10.2e}".format('N =',n[i]) + "kN, "
+            lines += " {:>3}{:>10.2e}".format('Mx=',mx[i]) + "kN.m, "
+            lines += " {:>3}{:>10.2e}".format('My=',my[i]) + "kN.m\n"
+        lines += "\n"
         obj.out(savefile,lines)
 
         # analysis
