@@ -869,6 +869,11 @@ class MyFrame(gui.MyFrame):
 
 class MyApp(wx.App):
     def OnInit(self):
+        new_dir_path = './db'
+        try:
+            os.mkdir(new_dir_path)
+        except FileExistsError:
+            pass
         self.frame = MyFrame(None, wx.ID_ANY, "")
         self.SetTopWindow(self.frame)
         self.frame.Show()
