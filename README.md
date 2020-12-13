@@ -30,7 +30,7 @@ uplift analysis by winkler rigid plate model
 ```
 # Usage
 
-## pip
+## pip install/ Module
 ``` shell
 >pip install numpy
 >pip install matplotlib
